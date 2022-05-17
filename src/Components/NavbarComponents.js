@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {Button, Container, Dropdown, ListGroup, Nav, Navbar, NavDropdown, Offcanvas} from "react-bootstrap";
+import {Button, Container, ListGroup, Navbar, NavDropdown, Offcanvas} from "react-bootstrap";
 import {GiHamburgerMenu} from "react-icons/gi"
 import {Link} from "react-router-dom";
 import axios from "axios";
@@ -7,9 +7,21 @@ import axios from "axios";
 const NavbarComponents = () => {
     const [juz, setJuz] = useState([]);
     const [show, setShow] = useState(false);
+    const [surah, setSurah] = useState([]);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    useEffect(() => {
+            axios.get("https://api.quran.com/api/v4/chapters?language=id")
+                .then((res) => {
+                    setSurah(res.data.chapters)
+                })
+                .catch((error) => {
+                    console.log(error, "Page Not Found")
+                })
+        }, []
+    );
 
     useEffect(() => {
             axios.get("https://api.quran.com/api/v4/juzs")
@@ -35,8 +47,8 @@ const NavbarComponents = () => {
                     </Button>
 
                     <Offcanvas show={show} onHide={handleClose} placement="end">
-                        <Offcanvas.Header closeButton>
-                            <Offcanvas.Title>Menu</Offcanvas.Title>
+                        <Offcanvas.Header className="bg-primary" closeButton>
+                            <Offcanvas.Title className="text-white">Menu</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
                             <ListGroup variant="flush">
@@ -46,27 +58,32 @@ const NavbarComponents = () => {
                                         id="basic-nav-dropdown"
                                         title="Juz">
                                         <div>
-                                            {juz.map((item, index)=>(
-                                                <NavDropdown.Item  key={index} ><Link to={"/juz/"+ item.id} className="text-decoration-none text-dark">Juz {item.id}</Link></NavDropdown.Item>
+                                            {juz.map((juzitem, index)=>(
+                                                <NavDropdown.Item  key={index} ><Link to={"/juz/"+ juzitem.id} className="text-decoration-none text-dark">Juz {juzitem.id}</Link></NavDropdown.Item>
                                             ))}
                                         </div>
                                     </NavDropdown>
                                 </ListGroup.Item>
                                 <ListGroup.Item action>
-                                    <Link to="/surah" className="text-decoration-none text-dark">
-                                        Daftar Surah
-                                    </Link>
-                                </ListGroup.Item>
-                                <ListGroup.Item action>
-                                    Tentang Surah
+                                    <NavDropdown
+                                        className="text-decoration-none"
+                                        id="basic-nav-dropdown"
+                                        title="Surah">
+                                        <div>
+                                            {surah.map((surahitem, index)=>(
+                                                <NavDropdown.Item  key={index} ><Link to={"/surah/"+ surahitem.id} className="text-decoration-none text-dark">{surahitem.id}. {surahitem.name_simple}</Link></NavDropdown.Item>
+                                            ))}
+                                        </div>
+                                    </NavDropdown>
                                 </ListGroup.Item>
                             </ListGroup>
                         </Offcanvas.Body>
-                        <Button>
-                            About
-                        </Button>
+                        <Link to="/about">
+                            <Button style={{width:"25rem"}}>
+                                About
+                            </Button>
+                        </Link>
                     </Offcanvas>
-
                 </Container>
             </Navbar>
         </div>
